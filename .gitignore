@@ -8,6 +8,7 @@ venv/
 
 #images
 /src/faces
+/src/temp
 /generated/prisma
 
 #logs
