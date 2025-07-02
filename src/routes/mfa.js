@@ -6,7 +6,9 @@ const {PrismaClient} = require("@prisma/client");
 const multer = require('multer');
 const fs = require('fs')
 const path = require('path');
-
+const axios = require('axios');
+const FormData = require('form-data');
+const { execSync } = require('child_process');
 const jwt = require("jsonwebtoken");
 
 
@@ -62,19 +64,52 @@ router.post('/verify-mfa', upload.single('face'), async (req,res) => {
         return res.status(400).json ({error: 'Image not provided'});
     }
 
-    const evidenceIsValid = true;
+    try {
+        //save image temp
+        const tempDir = path.join(__dirname, '..', 'temp')
+        if ( !fs.existsSync(tempDir)) {
+            fs.mkdirSync(tempDir)
+        }
 
-    if(!evidenceIsValid) {
-        return res.status(401).json ({error: 'Facial recognition failed'});
+        const storedImagePath = `src/faces/${userId}.jpg`;
+        const tempImagePath = `src/temp/${userId}_upload.jpg`;
+
+        fs.writeFileSync(tempImagePath, imageBuffer);
+
+        const form = new FormData();
+        form.append('face1', fs.createReadStream(storedImagePath));
+        form.append('face2', fs.createReadStream(tempImagePath));
+
+        const response = await axios.post('http://localhost:5000/verify', form, {
+            headers: form.getHeaders()
+        })
+
+        if (!response.data.match) {
+            return res.status(400).json ({error: 'Verify recognition failed'});
+        }
+
+        fs.unlink(tempImagePath, (err) => {
+            if (err) {
+                console.error("Error deleting temp image:", err);
+            }
+        });
+
+
+
+        //create token
+        const user = await prisma.user.findUnique({ where: { id: userId } });
+        const token = jwt.sign(
+            {userId : user.id, email : user.email},
+            process.env.JWT_SECRET,
+            {expiresIn: '1h'}
+        );
+
+        return res.status(200).json ({token})
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json({error: 'MFA verify failed'});
     }
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    const token = jwt.sign(
-        {userId : user.id, email : user.email},
-        process.env.JWT_SECRET,
-        {expiresIn: '1h'}
-    );
 
-    return res.status(200).json ({token});
 })
 
 module.exports = router;
