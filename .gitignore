@@ -1,5 +1,19 @@
+#node
 node_modules
-# Keep environment variables out of version control
 .env
+#python
+__pycache__/
+*.pyc
+venv/
+
+#images
 /src/faces
 /generated/prisma
+
+#logs
+*.logs
+.DS_Store
+Thumbs.db
+
+#Fields IDE
+.idea
