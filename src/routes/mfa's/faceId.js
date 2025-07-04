@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { prismaClient } = require('@prisma/client');
-const verifyToken = require('../middleware/verifyToken');
+const verifyToken = require('../../middleware/verifyToken');
 const {PrismaClient} = require("@prisma/client");
 const multer = require('multer');
 const fs = require('fs')
