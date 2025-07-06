@@ -33,7 +33,7 @@ router.post('/enable-mfa', verifyToken, upload.single('face'),async (req, res) =
 
     try {
         //Create folder if it doesnt exist
-        const folderPath = path.join(__dirname, '..', 'faces')
+        const folderPath = path.join(__dirname, '../..', 'faces')
         if (!fs.existsSync(folderPath)) {
             fs.mkdirSync(folderPath);
         }
@@ -66,7 +66,7 @@ router.post('/verify-mfa', upload.single('face'), async (req,res) => {
 
     try {
         //save image temp
-        const tempDir = path.join(__dirname, '..', 'temp')
+        const tempDir = path.join(__dirname, '../..', 'temp')
         if ( !fs.existsSync(tempDir)) {
             fs.mkdirSync(tempDir)
         }
@@ -84,15 +84,15 @@ router.post('/verify-mfa', upload.single('face'), async (req,res) => {
             headers: form.getHeaders()
         })
 
-        if (!response.data.match) {
-            return res.status(400).json ({error: 'Verify recognition failed'});
-        }
-
         fs.unlink(tempImagePath, (err) => {
             if (err) {
                 console.error("Error deleting temp image:", err);
             }
         });
+
+        if (!response.data.match) {
+            return res.status(400).json ({error: 'Verify recognition failed'});
+        }
 
 
 

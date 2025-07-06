@@ -10,8 +10,10 @@ app = FastAPI()
 @app.post("/verify")
 async def verify(face1: UploadFile = File(...), face2: UploadFile = File(...)):
     # Guardar temporalmente las imágenes
-    temp_dir = "temp_faces"
-    os.makedirs(temp_dir, exist_ok=True)
+    temp_dir = os.path.join("src", "temp")
+
+    if not os.path.exists(temp_dir):
+        return JSONResponse(content={"error": "La carpeta src/temp no existe"}, status_code=500)
 
     f1_path = os.path.join(temp_dir, f"{uuid.uuid4()}.jpg")
     f2_path = os.path.join(temp_dir, f"{uuid.uuid4()}.jpg")

@@ -10,7 +10,10 @@ datasource db {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
-  password  String
+  password  String?
+  googleId  String? @unique
+  name      String?
+  pictureUrl  String?
   CreatedAt DateTime @default(now())
   mfaEnable Boolean  @default(false)
   mfaMethod String?
