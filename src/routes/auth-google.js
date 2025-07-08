@@ -4,24 +4,36 @@ const axios = require('axios');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const dotenv =require('dotenv')
+
+dotenv.config();
+
 
 router.post('/', async (req,res) => {
-    const {token: googleToken } = req.body;
-
-    if (!googleToken) {
-        return res.status(401).json({error: "Token is required"});
+    const { code } = req.body;
+    if (!code) {
+        return res.status(401).json({error: "code is required"});
     }
 
     try {
+        const tokenRes = await axios.post('https://oauth2.googleapis.com/token', {
+            code,
+            client_id: process.env.Google_Client_Id,
+            client_secret: process.env.Google_Client_Secret,
+            redirect_uri: process.env.GOOGLE_REDIRECT_URI,
+            grant_type: 'authorization_code',
+        })
+
+        const { access_token } = tokenRes.data
+
         const { data } = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
             headers: {
-                Authorization: `Bearer ${googleToken}`
+                Authorization: `Bearer ${access_token}`
             }
         })
 
         const { id: googleId, email, name, picture } = data;
-        console.log(googleId);
-        console.log(email);
+        
         if(!email || !googleId){
             return res.status(401).json({error: "Token invalid"});
         }
@@ -52,6 +64,10 @@ router.post('/', async (req,res) => {
                 where: { id: user.id},
                 data: { googleId }
             })
+        }
+
+        if(user.mfaEnable){
+            return res.status(200).json({mfaRequire: true, method: user.mfaMethod, userId: user.id});
         }
 
         const token = jwt.sign(

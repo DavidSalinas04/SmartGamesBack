@@ -36,26 +36,28 @@ router.post('/register', async (req,res) => {
 
 router.post('/login', async (req,res) => {
     const { email,password } = req.body;
-
+    console.log(email)
+    console.log(password)
     try{
         //Search user
         const existingUser = await prisma.user.findUnique({where: {email}});
         if (!existingUser) {
-            return res.status(400).json({error: 'Incorrect email or password'});
+            return res.status(400).json({error: 'Incorrect email or password', ok: false});
         }
 
         // check password
 
         const isMatch = await bcrypt.compare(password, existingUser.password);
         if (!isMatch) {
-            return res.status(400).json({error: 'Incorrect email or password'});
+            return res.status(400).json({error: 'Incorrect email or password', ok: false});
         }
-
+        
         if (existingUser.mfaEnable && existingUser.mfaMethod) {
             return  res.status(200).json({
                 mfaRequired: true,
-                method: existingUser.mfaMethod,
-                userID: existingUser.id});
+                mfaMethod: existingUser.mfaMethod,
+                userID: existingUser.id,
+                ok: true});
         }
 
         // generate JWT
@@ -67,7 +69,7 @@ router.post('/login', async (req,res) => {
         );
 
         // respond token
-        return res.status(200).json({ token })
+        return res.status(200).json({ token, ok:true })
     } catch (err) {
         console.log(err);
         return res.status(500).json({error: 'Error trying to login', result: err});
