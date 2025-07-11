@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 // POST /api/register
 router.post('/register', async (req,res) => {
-    const {email, password} = req.body;
+    const {name, email, password} = req.body;
 
     try {
         //Validate existing user
@@ -22,6 +22,7 @@ router.post('/register', async (req,res) => {
         //Create User
         const newUser = await prisma.user.create({
             data: {
+                name,
                 email,
                 password : hashedPassword
             }
@@ -56,7 +57,7 @@ router.post('/login', async (req,res) => {
             return  res.status(200).json({
                 mfaRequired: true,
                 mfaMethod: existingUser.mfaMethod,
-                userID: existingUser.id,
+                userId: existingUser.id,
                 ok: true});
         }
 

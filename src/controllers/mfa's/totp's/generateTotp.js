@@ -4,12 +4,12 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
 exports.generateTotp = async (req,res) => {
-    const { userId } = req.body
+    const { name, userId } = req.body
 
-    if ( !userId ) return res.status(403).json ({error: 'User not found'});
+    if ( !userId || !name ) return res.status(403).json ({error: 'User not found'});
 
     const secret = speakeasy.generateSecret({
-        name: `SmartGame ({userId})`,
+        name: `SmartGame: ${name}`,
     });
 
     await prisma.user.update({
