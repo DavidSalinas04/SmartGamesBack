@@ -67,7 +67,12 @@ router.post('/', async (req,res) => {
         }
 
         if(user.mfaEnable){
-            return res.status(200).json({mfaRequire: true, method: user.mfaMethod, userId: user.id});
+            if(user.mfaMethod === 'totp') {
+                return res.status(200).json({mfaRequire: true, method: user.mfaMethod, userId: user.id, email: user.email});
+            }
+            if(user.mfaMethod === 'faceId') {
+                return res.status(200).json({mfaRequire: true, method: user.mfaMethod, userId: user.id, email: user.email});
+            }
         }
 
         const token = jwt.sign(

@@ -5,6 +5,8 @@ const prisma = new PrismaClient();
 exports.verifyTotp = async (req, res) => {
     const { userId, token } = req.body;
 
+    console.log(userId);
+    console.log(token);
     if(!userId || !token ) {
         return res.status(400).json({error: 'No user with this id'});
     }

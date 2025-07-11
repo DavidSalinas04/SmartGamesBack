@@ -57,7 +57,7 @@ router.post('/login', async (req,res) => {
             return  res.status(200).json({
                 mfaRequired: true,
                 mfaMethod: existingUser.mfaMethod,
-                userID: existingUser.id,
+                userId: existingUser.id,
                 ok: true});
         }
 
