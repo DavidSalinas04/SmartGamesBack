@@ -16,7 +16,7 @@ const prisma = new PrismaClient();
 const storage = multer.memoryStorage();
 const upload = multer({storage});
 
-router.post('/enable-mfa', verifyToken, upload.single('face'),async (req, res) => {
+router.post('/enable-faceId', verifyToken, upload.single('face'),async (req, res) => {
     const method  = req.body.method;
     const userId = req.user.userId;
     const faceImage = req.file?.buffer;
@@ -56,7 +56,7 @@ router.post('/enable-mfa', verifyToken, upload.single('face'),async (req, res) =
     }
 })
 
-router.post('/verify-mfa', upload.single('face'), async (req,res) => {
+router.post('/verify-faceId', upload.single('face'), async (req,res) => {
     const userId = req.body.userId;
     const imageBuffer = req.file?.buffer;
 
